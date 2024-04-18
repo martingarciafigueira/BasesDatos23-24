@@ -1,78 +1,43 @@
 --Realizar una transacción para agregar un nuevo jugador y actualizar la lista de goles de un equipo con los goles de ese jugador
+
 BEGIN TRANSACTION
 
-SELECT COUNT(*) AS NumeroJugadores FROM Futbolistas
+SELECT * FROM Futbolistas
 
-INSERT INTO Futbolistas (Codigo, Nombre, CodigoEquipo, Posicion, Edad, Goles)
-VALUES ('RC00084', 'Aitor Fernandez','#RCELTA', 'Portero',35, 20);
-
-SELECT COUNT(*) AS NumeroJugadores FROM Futbolistas
-
-SELECT Goles FROM Equipos
-WHERE Codigo = '#RCELTA'
+INSERT INTO Futbolistas (Codigo, Nombre, CodigoEquipo, Goles)
+VALUES ('RC0025', 'Diego Maradona', '#RCELTA', 78)
 
 UPDATE Equipos
-SET Goles = Goles + (SELECT Goles
-FROM Futbolistas
-WHERE Codigo = 'RC00084')
-WHERE Codigo = (SELECT CodigoEquipo
-FROM Futbolistas
-WHERE Codigo = 'RC00084');
+SET Goles += (SELECT Goles FROM Futbolistas WHERE Codigo = 'RC0025')
+WHERE Codigo = (SELECT CodigoEquipo FROM Futbolistas WHERE Codigo = 'RC0025')
 
-SELECT Goles FROM Equipos
-WHERE Codigo = '#RCELTA'
+COMMIT TRANSACTION;
 
-COMMIT
-
---Realizar una transacción para mover a un jugador de un equipo y no restar la cantidad de goles ni sumársela al nuevo equipo.
+--Realizar una transacción para mover a un jugador de un equipo y no restar la cantidad de goles pero sí sumársela al nuevo equipo.
 
 BEGIN TRANSACTION
-
-SELECT COUNT(*) AS NumJugadores
-FROM Futbolistas
-WHERE CodigoEquipo = '#GETAFE'
 
 UPDATE Futbolistas
-SET CodigoEquipo = '#GETAFE'
-WHERE Codigo = 'RC00084'
-
-SELECT COUNT(*) AS NumJugadores
-FROM Futbolistas
-WHERE CodigoEquipo = '#GETAFE'
-
-SELECT Goles FROM Equipos
-WHERE Codigo = '#GETAFE'
+SET CodigoEquipo = '#SVILLA'
+WHERE Codigo = 'RC0025'
 
 UPDATE Equipos
-SET Goles = Goles + (SELECT Goles
-FROM Futbolistas
-WHERE Codigo = 'RC00084')
-WHERE Codigo = (SELECT CodigoEquipo
-FROM Futbolistas
-WHERE Codigo = 'RC00084');
+SET Goles += (SELECT Goles FROM Futbolistas WHERE Codigo = 'RC0025')
+WHERE Codigo = (SELECT CodigoEquipo FROM Futbolistas WHERE Codigo = 'RC0025')
 
-SELECT Goles FROM Equipos
-WHERE Codigo = '#GETAFE'
-
-COMMIT
+COMMIT TRANSACTION;
 
 --Realizar una transacción para agregar un nuevo equipo y agregar 2 jugadores nuevos a ese equipo.
 
 BEGIN TRANSACTION
 
-INSERT INTO Equipos (Codigo, Nombre, Pais)
-VALUES ('#HERCULES', 'Hercules', 'España')
+INSERT INTO Equipos (Codigo, Nombre)
+VALUES ('#MCST', 'Montecastelo')
 
-INSERT INTO Futbolistas (Codigo, Nombre, CodigoEquipo)
-VALUES ('HER001', 'Lucía', '#HERCULES')
+INSERT INTO Futbolistas (Codigo, Nombre, CodigoEquipo, Goles)
+VALUES ('MCST01', 'Tacio', '#MCST', 1)
 
-INSERT INTO Futbolistas (Codigo, Nombre, CodigoEquipo)
-VALUES ('HER002', 'Eva', '#HERCULES')
+INSERT INTO Futbolistas (Codigo, Nombre, CodigoEquipo, Goles)
+VALUES ('MCST02', 'Dani', '#MCST', 2)
 
-SELECT * FROM Equipos
-WHERE Codigo = '#HERCULES'
-
-SELECT * FROM Futbolistas
-WHERE CodigoEquipo = '#HERCULES'
-
-COMMIT
+COMMIT TRANSACTION;
