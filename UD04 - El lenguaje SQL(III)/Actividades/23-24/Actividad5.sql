@@ -1,0 +1,10 @@
+
+--1
+GRANT SELECT, INSERT
+ON T_Clientes
+TO DAW2024;
+
+--2
+GRANT SELECT, UPDATE(apellido)
+ON T_Clientes
+TO DAW2024;
