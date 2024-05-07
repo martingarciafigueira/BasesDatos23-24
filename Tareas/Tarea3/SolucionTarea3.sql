@@ -168,19 +168,13 @@ GROUP BY p.nombre
 ORDER BY SUM(dc.cantidad*dc.precio_unitario) DESC
 
 -- 3. Seleccionar el nombre del cliente y el total gastado por cada cliente en  productos que empiezan por "P"
-SELECT cl.nombre 'Ej. 3. Nombre cliente', CONVERT(VARCHAR(10), SUM(dc.cantidad*dc.precio_unitario))+' €' 'Total gastado en monitores y mouses'
-FROM clientes cl
-INNER JOIN compras co ON co.id_cliente=cl.id
-INNER JOIN detalles_compra dc ON dc.id_compra= co.id
-INNER JOIN productos p ON p.id=dc.id_producto
-INNER JOIN (SELECT DISTINCT p.nombre 'Nombre Prod'
-			FROM clientes cl
-			INNER JOIN compras co ON co.id_cliente=cl.id
-			INNER JOIN detalles_compra dc ON dc.id_compra= co.id
-			INNER JOIN productos p ON p.id=dc.id_producto
-			WHERE p.nombre LIKE 'P%') pp ON pp.[Nombre Prod]=p.nombre
-GROUP BY cl.nombre
-ORDER BY SUM(dc.cantidad*dc.precio_unitario) DESC
+SELECT c.nombre 'Ej. 3. Nombre cliente', SUM(dc.cantidad * dc.precio_unitario) AS total_gastado
+FROM clientes c
+INNER JOIN compras co ON c.id = co.id_cliente
+INNER JOIN detalles_compra dc ON co.id = dc.id_compra
+INNER JOIN productos p ON dc.id_producto = p.id
+WHERE p.nombre LIKE 'M%'
+GROUP BY c.nombre;
 
 --4. Seleccionar el nombre del producto y el número de compras en las que se ha vendido más de una unidad del producto. 
 SELECT p.nombre 'Ej.4. Nombre Producto', COUNT(dc.id_producto) 'Nº de compras en las que se ha vendido más de una unidad del producto'
@@ -226,36 +220,17 @@ GROUP BY p.nombre
 HAVING COUNT(DISTINCT cl.id)>1
 
 -- 9. Seleccionar el nombre de los clientes y la cantidad total que han gastado en compras. 
-SELECT DISTINCT cl.nombre 'Ej. 9. Nombre del Cliente', CONVERT(VARCHAR(10), idCl_Can.Can)+' €' 'Cantidad total que ha gastado en compras'
-FROM productos p
-INNER JOIN detalles_compra dc ON dc.id_producto=p.id
-INNER JOIN compras co ON co.id=dc.id_compra
-INNER JOIN clientes cl ON cl.id=co.id_cliente
-INNER JOIN (SELECT co.id_cliente idCli, SUM(dc.cantidad*dc.precio_unitario) Can
-			FROM productos p
-			INNER JOIN detalles_compra dc ON dc.id_producto=p.id
-			INNER JOIN compras co ON co.id=dc.id_compra
-			INNER JOIN clientes cl ON cl.id=co.id_cliente
-			GROUP BY co.id_cliente) idCl_Can ON idCl_Can.idCli=cl.id
-ORDER BY [Cantidad total que ha gastado en compras] DESC
+SELECT YEAR(co.fecha) AS año, MONTH(co.fecha) AS mes, c.nombre, COUNT(co.id) AS cantidad_compras, SUM(dc.cantidad * dc.precio_unitario) AS total_gastado
+FROM clientes c
+INNER JOIN compras co ON c.id = co.id_cliente
+INNER JOIN detalles_compra dc ON co.id = dc.id_compra
+GROUP BY YEAR(co.fecha), MONTH(co.fecha), c.nombre;
 
 -- 10. Obtén toda la información de los clientes que han comprado más de un producto, junto con el total de su compra.
-SELECT DISTINCT cl.nombre 'Ej. 10. Nombre Cliente que ha comprado más de un producto', cl.id, cl.direccion 'Dirección', cl.correo_electronico 'Correo Electrónico', CONVERT(VARCHAR(10), idCl_Can.Can)+' €' 'Total de su compra'
-FROM productos p
-INNER JOIN detalles_compra dc ON dc.id_producto=p.id
-INNER JOIN compras co ON co.id=dc.id_compra
-INNER JOIN clientes cl ON cl.id=co.id_cliente
-INNER JOIN (
-			SELECT DISTINCT cl.id idCl, COUNT(p.id) pds
-			FROM productos p
-			INNER JOIN detalles_compra dc ON dc.id_producto=p.id
-			INNER JOIN compras co ON co.id=dc.id_compra
-			INNER JOIN clientes cl ON cl.id=co.id_cliente
-			GROUP BY cl.id
-			HAVING COUNT(co.id)>1) PxCl ON PxCl.idCl=cl.id
-INNER JOIN (SELECT co.id_cliente idCli, SUM(dc.cantidad*dc.precio_unitario) Can
-			FROM productos p
-			INNER JOIN detalles_compra dc ON dc.id_producto=p.id
-			INNER JOIN compras co ON co.id=dc.id_compra
-			INNER JOIN clientes cl ON cl.id=co.id_cliente
-			GROUP BY co.id_cliente) idCl_Can ON idCl_Can.idCli=cl.id
+SELECT c.*, SUM(dc.cantidad * dc.precio_unitario) AS total_compra
+FROM clientes c
+INNER JOIN compras co ON c.id = co.id_cliente
+INNER JOIN detalles_compra dc ON co.id = dc.id_compra
+GROUP BY c.id, c.nombre, c.correo_electronico, c.direccion
+HAVING COUNT(DISTINCT dc.id_producto) > 1;
+
