@@ -220,11 +220,11 @@ GROUP BY p.nombre
 HAVING COUNT(DISTINCT cl.id)>1
 
 -- 9. Seleccionar el nombre de los clientes y la cantidad total que han gastado en compras. 
-SELECT YEAR(co.fecha) AS año, MONTH(co.fecha) AS mes, c.nombre, COUNT(co.id) AS cantidad_compras, SUM(dc.cantidad * dc.precio_unitario) AS total_gastado
-FROM clientes c
-INNER JOIN compras co ON c.id = co.id_cliente
-INNER JOIN detalles_compra dc ON co.id = dc.id_compra
-GROUP BY YEAR(co.fecha), MONTH(co.fecha), c.nombre;
+SELECT YEAR(co.fecha) AS año, MONTH(co.fecha) AS mes, cl.nombre, COUNT(DISTINCT co.id) AS cantidad_compras, SUM(d.cantidad*d.precio_unitario) AS total_gastado
+FROM compras co
+LEFT JOIN detalles_compra d ON d.id_compra = co.id
+LEFT JOIN clientes cl ON cl.id = co.id_cliente
+GROUP BY MONTH(co.fecha), YEAR(co.fecha), cl.nombre
 
 -- 10. Obtén toda la información de los clientes que han comprado más de un producto, junto con el total de su compra.
 SELECT c.*, SUM(dc.cantidad * dc.precio_unitario) AS total_compra
